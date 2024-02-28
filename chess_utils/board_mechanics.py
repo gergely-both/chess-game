@@ -1,3 +1,5 @@
+# TODO: replace strings with objs (dict call obj / str+repr()), move to another git branch, try to spread things to new files, make venv + install tkinter, 
+
 import chess_utils.board_params as bp
 import tkinter as tk
 from collections import namedtuple
@@ -7,13 +9,16 @@ import os
 
 
 RESOURCE_PATH = "chess_pieces/"
+NumberedEquivalent = namedtuple("NumberedEuivalent", ["x", "y"])
+square_names_objs = {}
+figure_names_objs = {}
+figures_squares_orig = {}
+figures_squares_now = {} # =figures_squares_orig.copy()
 
 
 #########################################
 # MODEL
 #########################################
-
-NumberedEquivalent = namedtuple("NumberedEuivalent", ["x", "y"])
 
 
 class Square:
@@ -28,23 +33,23 @@ class Square:
 
     @classmethod
     def repr_lettered(cls, num_pair):
-        """returns sqaure name from numeric equivalent"""
+        """returns square name from numeric equivalent"""
         if len(num_pair) == 2:
-            for obj in squares_obj.values():
+            for obj in square_names_objs.values():
                 if obj.numbered_equivalent == num_pair:
                     return obj
 
     @classmethod
     def detect_square(cls, coordinates):
         """detects square by clicked coordinates"""
-        for square, obj in squares_obj.items():
+        for square, obj in square_names_objs.items():
             if coordinates in obj.coordinates:
                 return obj
 
     @classmethod
     def square_not_owned(cls, square):
         """scans if square is (already) occupied by own piece"""
-        for dict_figure, dict_square in figures_and_squares.items():
+        for dict_figure, dict_square in figures_squares_now.items():
             if square is dict_square and dict_figure.color is cls.game_instance.chosen_figure.color:
                 return False
         return True
@@ -91,7 +96,7 @@ class Figure:
     @classmethod
     def detect_figure(cls, selected_square):
         """detects piece by selected square"""
-        for figure, square in figures_and_squares.items():
+        for figure, square in figures_squares_now.items():
             if selected_square is square:
                 return figure
 
@@ -120,7 +125,7 @@ class Pawn(Figure):
                 elif initial.y == 5:
                     enpass_location = Square.repr_lettered((target.x, target.y - 1))
                     enpass_enemy = self.detect_enemy(enpass_location)
-                    if enpass_enemy and isinstance(enpass_enemy, Pawn) and {enpass_enemy, str(starting_figs_squares[enpass_enemy])}.issubset(self.game_instance.log[-1]):
+                    if enpass_enemy and isinstance(enpass_enemy, Pawn) and {enpass_enemy, str(figures_squares_orig[enpass_enemy])}.issubset(self.game_instance.log[-1]):
                         self.game_instance.enpass_enemy = enpass_enemy
                         return True
         elif self.color == Color.BLACK:
@@ -136,7 +141,7 @@ class Pawn(Figure):
                 elif initial.y == 4:
                     enpass_location = Square.repr_lettered((target.x, target.y + 1))
                     enpass_enemy = self.detect_figure(enpass_location)
-                    if enpass_enemy and isinstance(enpass_enemy, Pawn) and {enpass_enemy, str(starting_figs_squares[enpass_enemy])}.issubset(self.game_instance.log[-1]):
+                    if enpass_enemy and isinstance(enpass_enemy, Pawn) and {enpass_enemy, str(figures_squares_orig[enpass_enemy])}.issubset(self.game_instance.log[-1]):
                         self.game_instance.enpass_enemy = enpass_enemy
                         return True
 
@@ -156,17 +161,17 @@ class King(Figure):
                 if target.x > initial.x:
                     castle_midpoint_square = Square.repr_lettered((target.x - 1, target.y))
                     if self.game_instance.chosen_figure.color == Color.WHITE and "white_rook_2" not in chain(*self.game_instance.log) and "white_rook_2" in positions_dict:
-                        rook_position_num = figures_and_squares["white_rook_2"].numbered_equivalent
+                        rook_position_num = figures_squares_now["white_rook_2"].numbered_equivalent
                     elif self.game_instance.chosen_figure.color == Color.BLACK and "black_rook_2" not in chain(*self.game_instance.log) and "black_rook_2" in positions_dict:
-                        rook_position_num = figures_and_squares["black_rook_2"].numbered_equivalent
+                        rook_position_num = figures_squares_now["black_rook_2"].numbered_equivalent
                     else:
                         return False
                 elif target.x < initial.x:
                     castle_midpoint_square = Square.repr_lettered((target.x + 1, target.y))
                     if self.game_instance.chosen_figure.color == Color.WHITE and "white_rook_1" not in chain(*self.game_instance.log) and "white_rook_1" in positions_dict:
-                        rook_position_num = figures_and_squares["white_rook_1"].numbered_equivalent
+                        rook_position_num = figures_squares_now["white_rook_1"].numbered_equivalent
                     elif self.game_instance.chosen_figure.color == Color.BLACK and "black_rook_1" not in chain(*self.game_instance.log) and "black_rook_1" in positions_dict:
-                        rook_position_num = figures_and_squares["black_rook_1"].numbered_equivalent
+                        rook_position_num = figures_squares_now["black_rook_1"].numbered_equivalent
                     else:
                         return False
 
@@ -176,7 +181,7 @@ class King(Figure):
     @classmethod
     def in_safety(cls, chosen_figure, target_square):
         """scans whether moving piece to target square threatens own king"""
-        projected_positions = figures_and_squares.copy()
+        projected_positions = figures_squares_now.copy()
 
         attacked_piece = chosen_figure.detect_enemy(target_square)
         if attacked_piece and attacked_piece in projected_positions:
@@ -236,37 +241,35 @@ class Knight(Figure):
 
 
 # GENERATING OBJECTS FROM STRINGS INTO MULTIPLE REFERENCE DICTS; SAVING COPY FOR STARTING LAYOUT
-squares_obj = {}
+
 for square, coordinates in bp.squares_and_coordinates.items():
     central_coordinates = bp.square_centres[square]
     numbered_equivalent = NumberedEquivalent(bp.numeric_equivalent[square[0]], int(square[1]))
-    squares_obj[square] = Square(square, coordinates, central_coordinates, numbered_equivalent)
+    square_names_objs[square] = Square(square, coordinates, central_coordinates, numbered_equivalent)
 
-figures_obj = {}
 for piece in bp.pieces_and_positions:
     attributes = piece.split("_")
     color, kind, number = attributes[0], attributes[1], int(attributes[2])
     name = color + "_" + kind
     if kind == "pawn":
-        figures_obj[piece] = Pawn(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = Pawn(Color[color.upper()], kind, name, number)
     elif kind == "king":
-        figures_obj[piece] = King(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = King(Color[color.upper()], kind, name, number)
     elif kind == "rook":
-        figures_obj[piece] = Rook(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = Rook(Color[color.upper()], kind, name, number)
     elif kind == "bishop":
-        figures_obj[piece] = Bishop(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = Bishop(Color[color.upper()], kind, name, number)
     elif kind == "queen":
-        figures_obj[piece] = Queen(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = Queen(Color[color.upper()], kind, name, number)
     elif kind == "knight":
-        figures_obj[piece] = Knight(Color[color.upper()], kind, name, number)
+        figure_names_objs[piece] = Knight(Color[color.upper()], kind, name, number)
 
-starting_figs_squares = {}
 for piece, position in bp.pieces_and_positions.items():
-    figure = figures_obj[piece]
-    square = squares_obj[position]
-    starting_figs_squares[figure] = square
+    figure = figure_names_objs[piece]
+    square = square_names_objs[position]
+    figures_squares_orig[figure] = square
 
-figures_and_squares = starting_figs_squares.copy()
+figures_squares_now = figures_squares_orig.copy()
 
 
 #########################################
@@ -293,7 +296,7 @@ class Board:
         self.imgname_relpath = {os.path.splitext(k)[0]: RESOURCE_PATH + k for k in self.img_files}
         for img in self.imgname_relpath:
             setattr(self, img, tk.PhotoImage(file=self.imgname_relpath[img]))
-        for figure, square in figures_and_squares.items():  
+        for figure, square in figures_squares_now.items():  
             setattr(self, str(figure), self.canvas.create_image(square.central_coordinates, image=getattr(self, figure.name)))
 
         self.game_instance = None
@@ -312,10 +315,10 @@ class Board:
         """creates possibility-showing canvas objects and their ids"""
         game = self.game_instance
         possible_squares = []
-        for square, obj in squares_obj.items():
+        for square, obj in square_names_objs.items():
             target_square = obj
 
-            if game.chosen_figure.validate_move(game.initial_square, target_square, figures_and_squares) and King.in_safety(game.chosen_figure, target_square) and Square.square_not_owned(target_square):
+            if game.chosen_figure.validate_move(game.initial_square, target_square, figures_squares_now) and King.in_safety(game.chosen_figure, target_square) and Square.square_not_owned(target_square):
                 origo = target_square.central_coordinates
                 radius = bp.TILE_LENGTH // 8
                 fill = "green" if game.turn % 2 != 0 else "purple"
@@ -328,7 +331,7 @@ class Board:
 
     def hide_possibilities(self):
         """deletes possibility-showing canvas objects by ids"""
-        for square in squares_obj:
+        for square in square_names_objs:
             try:
                 self.canvas.delete(getattr(self, str(square)))
             except AttributeError:
@@ -375,7 +378,7 @@ class Game:
             self.board_instance.hide_possibilities()
             target_square = selected_square
             if not self.choose_piece(selected_square):
-                if self.chosen_figure.validate_move(self.initial_square, target_square, figures_and_squares) \
+                if self.chosen_figure.validate_move(self.initial_square, target_square, figures_squares_now) \
                         and King.in_safety(self.chosen_figure, target_square):
                     self.make_move(target_square)
                     self.log.append([self.turn, str(self.chosen_figure), str(self.initial_square), str(target_square)])
@@ -389,7 +392,7 @@ class Game:
 
     def promote_to(self, img_name, query_window):
         """references figure to promote, its destination, and the desired new figure object"""
-        del figures_and_squares[self.promote_piece]
+        del figures_squares_now[self.promote_piece]
         self.board_instance.canvas.delete(getattr(self.board_instance, str(self.promote_piece)))
         
         new_piece_attrs = img_name.split("_")
@@ -397,7 +400,7 @@ class Game:
         new_piece_name = new_piece_color + "_" + new_piece_kind
 
         occupied_numbers = []
-        for figure in figures_and_squares:
+        for figure in figures_squares_now:
             if figure.name == new_piece_name:
                 occupied_numbers.append(figure.number)
         new_piece_number = max(occupied_numbers) + 1
@@ -412,7 +415,7 @@ class Game:
             new_piece = Knight(Color[new_piece_color.upper()], new_piece_kind, new_piece_name, new_piece_number)
 
         setattr(self.board_instance, str(new_piece), self.board_instance.canvas.create_image(self.promote_at.central_coordinates, image=getattr(self.board_instance, img_name)))
-        figures_and_squares[new_piece] = self.promote_at
+        figures_squares_now[new_piece] = self.promote_at
 
         self.promote_piece = None
         self.promote_at = None
@@ -424,13 +427,13 @@ class Game:
         x = (target.x - initial.x) * bp.TILE_LENGTH
         y = (initial.y - target.y) * bp.TILE_LENGTH
         if self.attacked_figure:
-            del figures_and_squares[self.attacked_figure]
+            del figures_squares_now[self.attacked_figure]
             self.board_instance.canvas.delete(getattr(self.board_instance, str(self.attacked_figure)))
         elif self.enpass_enemy:
-            del figures_and_squares[self.enpass_enemy]
+            del figures_squares_now[self.enpass_enemy]
             self.board_instance.canvas.delete(getattr(self.board_instance, str(self.enpass_enemy)))
         self.board_instance.canvas.move(getattr(self.board_instance, str(self.chosen_figure)), x, y)
-        figures_and_squares[self.chosen_figure] = target_square
+        figures_squares_now[self.chosen_figure] = target_square
 
         if (self.chosen_figure.name == "white_pawn" and target.y == 8) or (self.chosen_figure.name == "black_pawn" and target.y == 1):
             promotion_query = tk.Toplevel()
@@ -448,14 +451,14 @@ class Game:
         elif str(self.chosen_figure) == "white_king_1" and abs(target.x - initial.x) == 2:
             if target.x - initial.x == 2:
                 self.board_instance.canvas.move(self.board_instance.white_rook_2, -2 * bp.TILE_LENGTH, 0)
-                figures_and_squares["white_rook_2"] = squares_obj["f1"]
+                figures_squares_now["white_rook_2"] = square_names_objs["f1"]
             elif target.x - initial.x == -2:
                 self.board_instance.canvas.move(self.board_instance.white_rook_1, 3 * bp.TILE_LENGTH, 0)
-                figures_and_squares["white_rook_1"] = squares_obj["d1"]
+                figures_squares_now["white_rook_1"] = square_names_objs["d1"]
         elif str(self.chosen_figure) == "black_king_1" and abs(target.x - initial.x) == 2:
             if target.x - initial.x == 2:
                 self.board_instance.canvas.move(self.board_instance.black_rook_2, -2 * bp.TILE_LENGTH, 0)
-                figures_and_squares["black_rook_2"] = squares_obj["f8"]
+                figures_squares_now["black_rook_2"] = square_names_objs["f8"]
             elif target.x - initial.x == -2:
                 self.board_instance.canvas.move(self.board_instance.black_rook_1, 3 * bp.TILE_LENGTH, 0)
-                figures_and_squares["black_rook_1"] = squares_obj["d8"]
+                figures_squares_now["black_rook_1"] = square_names_objs["d8"]

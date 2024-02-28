@@ -1,27 +1,27 @@
 import string
 
-# chess board parameters
+# chess board design
 TILES_PER_SIDE = 8
 TILE_LENGTH = 100  # pixels
 DARK_COLOR = "#1b262c"
 LIGHT_COLOR = "#0f4c75"
 
-# square names with all their belonging coordinates
+# square names with all their coordinates
 squares_and_coordinates = {}
-for X in range(TILES_PER_SIDE):
-    for Y in range(TILES_PER_SIDE):
-        tile_id = string.ascii_lowercase[:TILES_PER_SIDE][X] + string.digits[TILES_PER_SIDE:0:-1][Y]
-        tile_coordinates = [(x, y) for x in range(X * TILE_LENGTH, (X + 1) * TILE_LENGTH) for y in range(Y * TILE_LENGTH, (Y + 1) * TILE_LENGTH)]
+for x in range(TILES_PER_SIDE):
+    for y in range(TILES_PER_SIDE):
+        tile_id = string.ascii_lowercase[:TILES_PER_SIDE][x] + string.digits[TILES_PER_SIDE:0:-1][y]
+        tile_coordinates = [(xb, yb) for xb in range(x * TILE_LENGTH, (x + 1) * TILE_LENGTH) for yb in range(y * TILE_LENGTH, (y + 1) * TILE_LENGTH)]
         squares_and_coordinates[tile_id] = tile_coordinates
 
-# all squares and their belonging central coordinates
-square_centres = {}
+# square names with their central coordinates
+square_centers = {}
 for square in squares_and_coordinates:
     coordinates = (squares_and_coordinates[square][0][0] + TILE_LENGTH // 2, squares_and_coordinates[square][0][1] + TILE_LENGTH // 2)
-    square_centres[square] = coordinates
+    square_centers[square] = coordinates
 
 
-# classic initial piece positions
+# piece names with their starting positions
 pieces_and_positions = {
     "white_pawn_1": "a2",
     "white_pawn_2": "b2",
@@ -57,9 +57,9 @@ pieces_and_positions = {
     "black_rook_2": "h8",
 }
 
-# starting piece positions for original setup reference
+# starting positions copy for later reference
 starting_positions = pieces_and_positions.copy()
 
-# representing tile lettering as numbers for move validating calculations, and vice versa
+# chess board squares name forms
 numeric_equivalent = {letter: number for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
 lettered_equivalent = {number: letter for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
