@@ -1,5 +1,3 @@
-# TODO: replace strings with objs (dict call obj / str+repr()), try to spread things to new files, make venv + install tkinter, non-string class instance references, 
-
 import chess_utils.board_params as bp
 import tkinter as tk
 from collections import namedtuple

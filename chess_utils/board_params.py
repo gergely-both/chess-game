@@ -10,9 +10,9 @@ LIGHT_COLOR = "#0f4c75"
 squares_and_coordinates = {}
 for x in range(TILES_PER_SIDE):
     for y in range(TILES_PER_SIDE):
-        tile_id = string.ascii_lowercase[:TILES_PER_SIDE][x] + string.digits[TILES_PER_SIDE:0:-1][y]
+        tile_ID = string.ascii_lowercase[:TILES_PER_SIDE][x] + string.digits[TILES_PER_SIDE:0:-1][y]
         tile_coordinates = [(xb, yb) for xb in range(x * TILE_LENGTH, (x + 1) * TILE_LENGTH) for yb in range(y * TILE_LENGTH, (y + 1) * TILE_LENGTH)]
-        squares_and_coordinates[tile_id] = tile_coordinates
+        squares_and_coordinates[tile_ID] = tile_coordinates
 
 # square names with their central coordinates
 square_centers = {}
