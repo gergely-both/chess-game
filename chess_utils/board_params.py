@@ -2,7 +2,7 @@ import string
 
 # chess board design
 TILES_PER_SIDE = 8
-TILE_LENGTH = 100  # pixels
+TILE_LENGTH = 100 # pixels
 DARK_COLOR = "#1b262c"
 LIGHT_COLOR = "#0f4c75"
 
@@ -63,3 +63,4 @@ starting_positions = pieces_and_positions.copy()
 # chess board squares name forms
 numeric_equivalent = {letter: number for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
 lettered_equivalent = {number: letter for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
+

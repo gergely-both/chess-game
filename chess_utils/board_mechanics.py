@@ -1,3 +1,4 @@
+#TODO: make figure pngs size by params, 
 import chess_utils.board_params as bp
 import tkinter as tk
 from collections import namedtuple
@@ -43,7 +44,7 @@ class Square:
         for obj in square_names_objs.values():
             if coordinates in obj.all_coordinates:
                 return obj
-
+                
     @classmethod
     def square_not_owned(cls, square):
         """checks/scans if square is already occupied by own piece"""
@@ -100,9 +101,9 @@ class Figure:
 
     def detect_enemy(self, selected_square):
         detected_piece = Figure.detect_figure(selected_square)
-        enemy_piece = detected_piece if detected_piece.color != self.color else None
-        return enemy_piece
-
+        if detected_piece:
+            enemy_piece = detected_piece if (detected_piece.color != self.color) else None
+            return enemy_piece
 
 class Pawn(Figure):
     def __init__(self, color, kind, name, number):
@@ -267,7 +268,6 @@ for piece, position in bp.pieces_and_positions.items():
     figure = figure_names_objs[piece]
     square = square_names_objs[position]
     figures_squares_orig[figure] = square
-
 figures_squares_now = figures_squares_orig.copy()
 
 
@@ -362,8 +362,7 @@ class Game:
 
     def choose_piece(self, selected_square):
         """selects figure to move OR attack"""
-        detected_figure = Figure.detect_figure(selected_square)
-        if detected_figure:
+        if detected_figure := Figure.detect_figure(selected_square):
             if self.detect_turn() is detected_figure.color:
                 self.initial_square = selected_square
                 self.chosen_figure = detected_figure
