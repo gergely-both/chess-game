@@ -1,12 +1,15 @@
 import chess_utils.board_view as bv
+from collections import namedtuple
 from enum import Enum
 from itertools import cycle, chain
-
 
 square_names_objs = {}
 figure_names_objs = {}
 figures_squares_orig = {}
 figures_squares_now = {}
+
+
+NumberedEquivalent = namedtuple("NumberedEquivalent", ["x", "y"])
 
 
 #########################################
@@ -263,5 +266,4 @@ for piece, position in bv.pieces_and_positions.items():
     square = square_names_objs[position]
     figures_squares_orig[figure] = square
 figures_squares_now = figures_squares_orig.copy()
-
 

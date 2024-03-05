@@ -1,16 +1,14 @@
 # TODO: make move pass to view part, 
 
 import chess_utils.board_view as bv
+from chess_utils.board_model import square_names_objs, figures_squares_now
 import tkinter as tk
-
-
-square_names_objs = {}
-figures_squares_now = {}
 
 
 #########################################
 # CONTROLLER
 #########################################
+
 
 class Game:
     def __init__(self):
@@ -132,3 +130,4 @@ class Game:
             elif target.x - initial.x == -2:
                 self.board_instance.canvas.move(self.board_instance.black_rook_1, 3 * bv.TILE_LENGTH, 0)
                 figures_squares_now["black_rook_1"] = square_names_objs["d8"]
+

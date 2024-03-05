@@ -1,18 +1,17 @@
+#TODO: make figure pngs size by params, 
+
+
 #########################################
 # VIEW
 #########################################
 
-#TODO: make figure pngs size by params, 
 
+from chess_utils.board_model import square_names_objs, figures_squares_now
 import string
 import tkinter as tk
 import os
 
-
 RESOURCE_PATH = "chess_pieces/"
-square_names_objs = {}
-figures_squares_now = {}
-
 
 # chess board design
 TILES_PER_SIDE = 8
@@ -138,5 +137,4 @@ class Board:
                 self.canvas.delete(getattr(self, str(square)))
             except AttributeError:
                 continue
-
 
