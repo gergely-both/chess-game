@@ -1,1 +1,2 @@
-from chess_utils.board_mechanics import Board, Game
+from chess_utils.board_controller import Game
+from chess_utils.board_view import Board
