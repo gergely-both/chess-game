@@ -2,15 +2,16 @@
 # VIEW
 #########################################
 
-# TODO: click system revise, make pngs resizable by param, 
 
 from chess_utils.board_parameters import RESOURCE_PATH, TILES_PER_SIDE, TILE_LENGTH, DARK_COLOR, LIGHT_COLOR
 from chess_utils.board_model import square_names_objs, figures_squares_now, figures_squares_orig, Figure, Square
+from chess_utils.board_controller import Game
 import tkinter as tk
 import os
 
 
 class Board:
+    """board type for creating board display with figures overlaid; click detector, shows/hides possible moves"""
     def __init__(self, master):
         self.master = master
         self.master.title("Chess Game")
@@ -24,7 +25,7 @@ class Board:
                     self.canvas.create_rectangle(i+k, j+k, TILE_LENGTH+i+k, TILE_LENGTH+j+k, fill=LIGHT_COLOR)
                     self.canvas.create_rectangle((TILES_PER_SIDE*TILE_LENGTH)-i-k, j+k, ((TILES_PER_SIDE-1)*TILE_LENGTH)-i-k, TILE_LENGTH+j+k, fill=DARK_COLOR)
         self.canvas.pack()
-
+        # TODO: make pngs resizable by parameters, 
         self.img_files = os.listdir(RESOURCE_PATH)
         self.imgname_relpath = {os.path.splitext(k)[0]: RESOURCE_PATH + k for k in self.img_files}
         for img in self.imgname_relpath:
@@ -32,37 +33,41 @@ class Board:
         for figure, square in figures_squares_orig.items():  
             setattr(self, str(figure), self.canvas.create_image(square.central_coordinates, image=getattr(self, figure.name)))
 
-        self.game_instance = None
+        game_instance = None
 
         
     def click(self, event, game_instance):
-        """makes contact between types for mutual references; sends GUI event to controller"""
-        self.game_instance = game_instance
+        # TODO: make click bound to specific instances instead whole classes, if viable (to make multi-window display possible)
+        """binds board and game instances to other types for mutual reference; dispatches to controller section"""
+        Board.game_instance = game_instance
+        Game.board_instance = self
         Figure.game_instance = game_instance
         Square.game_instance = game_instance
-        game_instance.board_instance = self
 
         selected_coordinates = event.x, event.y
         game_instance.select_square(selected_coordinates)
 
         
     def show_possibilities(self):
+        # NOTE: is bound to instance and class
         """makes possibility-showing canvas objects and their IDs"""
-        game = self.game_instance
         possible_squares = []
         for square, obj in square_names_objs.items():
             target_square = obj
 
-            if game.chosen_figure.validate_move(game.initial_square, target_square, figures_squares_now) and Figure.king_in_safety(game.chosen_figure, target_square) and Square.square_not_owned(target_square):
-                origo = target_square.central_coordinates
-                radius = TILE_LENGTH // 8
-                fill = "green" if game.turn % 2 != 0 else "purple"
-                setattr(self, square, self.canvas.create_oval(origo[0] - radius, origo[1] - radius, origo[0] + radius, origo[1] + radius, fill=fill))
-                possible_squares.append(target_square)
-                game.enpass_enemy = None
+            if self.game_instance.chosen_figure.validate_move(self.game_instance.initial_square, target_square, figures_squares_now):
+                if Figure.king_in_safety(self.game_instance.chosen_figure, target_square):
+                    if Square.square_not_owned(target_square):
+                        origo = target_square.central_coordinates
+                        radius = TILE_LENGTH // 8
+                        fill = "green" if self.game_instance.turn % 2 != 0 else "purple"
+                        setattr(self, square, self.canvas.create_oval(origo[0] - radius, origo[1] - radius, origo[0] + radius, origo[1] + radius, fill=fill))
+                        possible_squares.append(target_square)
+                        self.game_instance.enpass_enemy = None
+
         if not possible_squares:
-            game.chosen_figure = None
-            game.initial_square = None
+            self.game_instance.chosen_figure = None
+            self.game_instance.initial_square = None
 
             
     def hide_possibilities(self):

@@ -8,6 +8,7 @@ from collections import namedtuple
 from enum import Enum
 from itertools import cycle, chain
 
+
 NumberedEquivalent = namedtuple("NumberedEquivalent", ["x", "y"])
 square_names_objs = {}
 figure_names_objs = {}
@@ -22,8 +23,12 @@ class Square:
         self.central_coordinates = central_coordinates
         self.numerically = NumberedEquivalent(bp.numeric_equivalent[name[0]], int(name[1]))
 
+        game_instance = None
+        
+
     def __repr__(self):
         return self.name
+
 
     @classmethod
     def alphabetically(cls, num_pair):
@@ -33,13 +38,15 @@ class Square:
                 if obj.numerically == num_pair:
                     return obj
 
+
     @classmethod
     def detect_square(cls, coordinates):
         """returns square object of clicked coordinates"""
         for obj in square_names_objs.values():
             if coordinates in obj.all_coordinates:
                 return obj
-                
+
+
     @classmethod
     def square_not_owned(cls, square):
         """checks/scans if square is already occupied by own piece"""
@@ -60,16 +67,22 @@ class Figure:
         self.kind: str = kind
         self.name: str = name
         self.number: int = number
-    
+
+        game_instance = None
+
+
     def __repr__(self):
         color = str(self.color).split(".")[1].lower()
         return f"{color}_{self.kind}_{self.number}"
 
+
     def __hash__(self):
         return hash(self.__repr__())
 
+
     def __eq__(self, other):
         return hash(self) == hash(other)
+
 
     def passage_free(self, initial, target, positions_dict):
         """checks/scans if any square between initial and target squares is occupied by any piece"""
@@ -87,6 +100,7 @@ class Figure:
                     return False
         return True
 
+
     @classmethod
     def detect_figure(cls, selected_square):
         """returns figure object on user-selected square object"""
@@ -94,11 +108,13 @@ class Figure:
             if selected_square is square:
                 return figure
 
+
     def detect_enemy(self, selected_square):
         detected_piece = Figure.detect_figure(selected_square)
         if detected_piece:
             enemy_piece = detected_piece if (detected_piece.color != self.color) else None
             return enemy_piece
+
 
     @classmethod
     def king_in_safety(cls, chosen_figure, target_square):
@@ -124,6 +140,7 @@ class Figure:
 class Pawn(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
+
 
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates pawn moves: by both colors, initial double move OR simple move, capturing simply OR en passant"""
@@ -167,6 +184,7 @@ class King(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
+
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates king moves: single move OR castling (short or long: user-selected non-offensive)"""
         # NOTE: can not castle from check, through it (both checked below), nor into it (checked back in main cycle later), also entire passage must be free
@@ -196,10 +214,10 @@ class King(Figure):
                     return True
 
 
-
 class Rook(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
+
 
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates rook moves"""
@@ -211,6 +229,7 @@ class Bishop(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
+
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates bishop moves"""
         initial, target = initial_square.numerically, target_square.numerically
@@ -220,6 +239,7 @@ class Bishop(Figure):
 class Queen(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
+
 
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates queen moves"""
@@ -232,6 +252,7 @@ class Knight(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
+
     def validate_move(self, initial_square, target_square, positions_dict):
         """validates knight moves"""
         initial, target = initial_square.numerically, target_square.numerically
@@ -239,7 +260,6 @@ class Knight(Figure):
 
 
 # GENERATING OBJECTS FROM STRINGS INTO MULTIPLE REFERENCE DICTS; SAVING COPY FOR STARTING LAYOUT
-
 for square, coordinates in bp.squares_and_coordinates.items():
     central_coordinates = bp.square_centers[square]
     square_names_objs[square] = Square(square, coordinates, central_coordinates)

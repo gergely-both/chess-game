@@ -2,7 +2,6 @@
 # CONTROLLER
 #########################################
 
-# TODO: pass movement system to view (remove promotion types import), 
 
 import chess_utils.board_parameters as bp
 from chess_utils.board_model import square_names_objs, figures_squares_now, Figure, Square, Color, Queen, Rook, Knight, Bishop
@@ -10,8 +9,8 @@ import tkinter as tk
 
 
 class Game:
+    """game type for controlling gui interactions by the model rules"""
     def __init__(self):
-        self.board_instance = None
         self.turn = 1
         self.chosen_figure = None
         self.initial_square = None
@@ -21,6 +20,9 @@ class Game:
         self.promote_at = None
         self.log = []
 
+        board_instance = None
+
+        
     def detect_turn(self):
         """returns current turn's color"""
         if self.turn % 2 == 0:
@@ -28,6 +30,7 @@ class Game:
         else:
             return Color.WHITE
 
+        
     def choose_piece(self, selected_square):
         """selects figure to move OR attack"""
         if detected_figure := Figure.detect_figure(selected_square):
@@ -38,6 +41,7 @@ class Game:
             elif self.chosen_figure:
                 self.attacked_figure = detected_figure
 
+                
     def select_square(self, selected_coordinates):
         """main cycle for selecting squares, pieces, showing options, validating then making moves, log and reset"""
         selected_square = Square.detect_square(selected_coordinates)
@@ -45,11 +49,11 @@ class Game:
             self.board_instance.hide_possibilities()
             target_square = selected_square
             if not self.choose_piece(selected_square):
-                if self.chosen_figure.validate_move(self.initial_square, target_square, figures_squares_now) \
-                        and Figure.king_in_safety(self.chosen_figure, target_square):
-                    self.make_move(target_square)
-                    self.log.append([self.turn, str(self.chosen_figure), str(self.initial_square), str(target_square)])
-                    self.turn += 1
+                if self.chosen_figure.validate_move(self.initial_square, target_square, figures_squares_now):
+                    if Figure.king_in_safety(self.chosen_figure, target_square):
+                        self.make_move(target_square)
+                        self.log.append([self.turn, str(self.chosen_figure), str(self.initial_square), str(target_square)])
+                        self.turn += 1
             self.chosen_figure = None
             self.initial_square = None
             self.attacked_figure = None
@@ -57,6 +61,7 @@ class Game:
         elif self.choose_piece(selected_square):
             self.board_instance.show_possibilities()
 
+            
     def promote_to(self, img_name, query_window):
         """references figure to promote, its destination, and the desired new figure object"""
         del figures_squares_now[self.promote_piece]
@@ -88,7 +93,9 @@ class Game:
         self.promote_at = None
         query_window.destroy()
 
+        
     def make_move(self, target_square):
+        # TODO: pass movement system to view (remove promotion types import), 
         """removes captured figure from positions db, makes move, sends to promotion, does castling"""
         initial, target = self.initial_square.numerically, target_square.numerically
         x = (target.x - initial.x) * bp.TILE_LENGTH
