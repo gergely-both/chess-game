@@ -1,5 +1,7 @@
 import string
 
+RESOURCE_PATH = "chess_pieces/"
+
 # chess board design
 TILES_PER_SIDE = 8
 TILE_LENGTH = 100 # pixels
@@ -19,7 +21,6 @@ square_centers = {}
 for square in squares_and_coordinates:
     coordinates = (squares_and_coordinates[square][0][0] + TILE_LENGTH // 2, squares_and_coordinates[square][0][1] + TILE_LENGTH // 2)
     square_centers[square] = coordinates
-
 
 # piece names with their starting positions
 pieces_and_positions = {
@@ -63,4 +64,3 @@ starting_positions = pieces_and_positions.copy()
 # chess board squares name forms
 numeric_equivalent = {letter: number for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
 lettered_equivalent = {number: letter for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
-
