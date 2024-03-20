@@ -1,20 +1,18 @@
-import chess_utils.board_view as bv
+#########################################
+# MODEL
+#########################################
+
+
+import chess_utils.board_params as bp
 from collections import namedtuple
 from enum import Enum
 from itertools import cycle, chain
 
+NumberedEquivalent = namedtuple("NumberedEquivalent", ["x", "y"])
 square_names_objs = {}
 figure_names_objs = {}
 figures_squares_orig = {}
 figures_squares_now = {}
-
-
-NumberedEquivalent = namedtuple("NumberedEquivalent", ["x", "y"])
-
-
-#########################################
-# MODEL
-#########################################
 
 
 class Square:
@@ -22,7 +20,7 @@ class Square:
         self.name = name
         self.all_coordinates = all_coordinates
         self.central_coordinates = central_coordinates
-        self.numerically = NumberedEquivalent(bv.numeric_equivalent[name[0]], int(name[1]))
+        self.numerically = NumberedEquivalent(bp.numeric_equivalent[name[0]], int(name[1]))
 
     def __repr__(self):
         return self.name
@@ -102,6 +100,27 @@ class Figure:
             enemy_piece = detected_piece if (detected_piece.color != self.color) else None
             return enemy_piece
 
+    @classmethod
+    def king_in_safety(cls, chosen_figure, target_square):
+        """checks if piece move to target square threatens own king"""
+        projected_positions = figures_squares_now.copy()
+
+        attacked_piece = chosen_figure.detect_enemy(target_square)
+        if attacked_piece and attacked_piece in projected_positions:
+            del projected_positions[attacked_piece]
+        projected_positions[chosen_figure] = target_square
+
+        if chosen_figure.color == Color.WHITE:
+            for figure in projected_positions:
+                if figure.color == Color.BLACK and figure.validate_move(projected_positions[figure], projected_positions["white_king_1"], projected_positions):
+                    return False
+        elif chosen_figure.color == Color.BLACK:
+            for figure in projected_positions:
+                if figure.color == Color.WHITE and figure.validate_move(projected_positions[figure], projected_positions["black_king_1"], projected_positions):
+                    return False
+        return True
+
+
 class Pawn(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
@@ -155,7 +174,7 @@ class King(Figure):
         if abs(target.x - initial.x) <= 1 and abs(target.y - initial.y) <= 1:
             return True
         elif self == self.game_instance.chosen_figure and abs(target.x - initial.x) == 2 and target.y - initial.y == 0:
-            if self.game_instance.chosen_figure not in chain(*self.game_instance.log) and self.in_safety(self.game_instance.chosen_figure, target_square=self.game_instance.initial_square):
+            if self.game_instance.chosen_figure not in chain(*self.game_instance.log) and Figure.king_in_safety(self.game_instance.chosen_figure, target_square=self.game_instance.initial_square):
                 if target.x > initial.x:
                     castle_midpoint_square = Square.alphabetically((target.x - 1, target.y))
                     if self.game_instance.chosen_figure.color == Color.WHITE and "white_rook_2" not in chain(*self.game_instance.log) and "white_rook_2" in positions_dict:
@@ -173,28 +192,9 @@ class King(Figure):
                     else:
                         return False
 
-                if self.passage_free(initial, rook_position_num, positions_dict) and self.in_safety(self.game_instance.chosen_figure, target_square=castle_midpoint_square):
+                if self.passage_free(initial, rook_position_num, positions_dict) and Figure.king_in_safety(self.game_instance.chosen_figure, target_square=castle_midpoint_square):
                     return True
 
-    @classmethod
-    def in_safety(cls, chosen_figure, target_square):
-        """checks if piece move to target square threatens own king"""
-        projected_positions = figures_squares_now.copy()
-
-        attacked_piece = chosen_figure.detect_enemy(target_square)
-        if attacked_piece and attacked_piece in projected_positions:
-            del projected_positions[attacked_piece]
-        projected_positions[chosen_figure] = target_square
-
-        if chosen_figure.color == Color.WHITE:
-            for figure in projected_positions:
-                if figure.color == Color.BLACK and figure.validate_move(projected_positions[figure], projected_positions["white_king_1"], projected_positions):
-                    return False
-        elif chosen_figure.color == Color.BLACK:
-            for figure in projected_positions:
-                if figure.color == Color.WHITE and figure.validate_move(projected_positions[figure], projected_positions["black_king_1"], projected_positions):
-                    return False
-        return True
 
 
 class Rook(Figure):
@@ -240,11 +240,11 @@ class Knight(Figure):
 
 # GENERATING OBJECTS FROM STRINGS INTO MULTIPLE REFERENCE DICTS; SAVING COPY FOR STARTING LAYOUT
 
-for square, coordinates in bv.squares_and_coordinates.items():
-    central_coordinates = bv.square_centers[square]
+for square, coordinates in bp.squares_and_coordinates.items():
+    central_coordinates = bp.square_centers[square]
     square_names_objs[square] = Square(square, coordinates, central_coordinates)
 
-for piece in bv.pieces_and_positions:
+for piece in bp.pieces_and_positions:
     attributes = piece.split("_")
     color, kind, number = attributes[0], attributes[1], int(attributes[2])
     name = color + "_" + kind
@@ -261,7 +261,7 @@ for piece in bv.pieces_and_positions:
     elif kind == "knight":
         figure_names_objs[piece] = Knight(Color[color.upper()], kind, name, number)
 
-for piece, position in bv.pieces_and_positions.items():
+for piece, position in bp.pieces_and_positions.items():
     figure = figure_names_objs[piece]
     square = square_names_objs[position]
     figures_squares_orig[figure] = square

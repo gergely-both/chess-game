@@ -1,13 +1,12 @@
-# TODO: make move pass to view part, 
-
-import chess_utils.board_view as bv
-from chess_utils.board_model import square_names_objs, figures_squares_now
-import tkinter as tk
-
-
 #########################################
 # CONTROLLER
 #########################################
+
+# TODO: pass movement system to view?, 
+
+import chess_utils.board_params as bp
+from chess_utils.board_model import square_names_objs, figures_squares_now, Figure, Square, Color, Queen, Rook, Knight, Bishop
+import tkinter as tk
 
 
 class Game:
@@ -47,7 +46,7 @@ class Game:
             target_square = selected_square
             if not self.choose_piece(selected_square):
                 if self.chosen_figure.validate_move(self.initial_square, target_square, figures_squares_now) \
-                        and King.in_safety(self.chosen_figure, target_square):
+                        and Figure.king_in_safety(self.chosen_figure, target_square):
                     self.make_move(target_square)
                     self.log.append([self.turn, str(self.chosen_figure), str(self.initial_square), str(target_square)])
                     self.turn += 1
@@ -92,8 +91,8 @@ class Game:
     def make_move(self, target_square):
         """removes captured figure from positions db, makes move, sends to promotion, does castling"""
         initial, target = self.initial_square.numerically, target_square.numerically
-        x = (target.x - initial.x) * bv.TILE_LENGTH
-        y = (initial.y - target.y) * bv.TILE_LENGTH
+        x = (target.x - initial.x) * bp.TILE_LENGTH
+        y = (initial.y - target.y) * bp.TILE_LENGTH
         if self.attacked_figure:
             del figures_squares_now[self.attacked_figure]
             self.board_instance.canvas.delete(getattr(self.board_instance, str(self.attacked_figure)))
@@ -118,16 +117,16 @@ class Game:
 
         elif str(self.chosen_figure) == "white_king_1" and abs(target.x - initial.x) == 2:
             if target.x - initial.x == 2:
-                self.board_instance.canvas.move(self.board_instance.white_rook_2, -2 * bv.TILE_LENGTH, 0)
+                self.board_instance.canvas.move(self.board_instance.white_rook_2, -2 * bp.TILE_LENGTH, 0)
                 figures_squares_now["white_rook_2"] = square_names_objs["f1"]
             elif target.x - initial.x == -2:
-                self.board_instance.canvas.move(self.board_instance.white_rook_1, 3 * bv.TILE_LENGTH, 0)
+                self.board_instance.canvas.move(self.board_instance.white_rook_1, 3 * bp.TILE_LENGTH, 0)
                 figures_squares_now["white_rook_1"] = square_names_objs["d1"]
         elif str(self.chosen_figure) == "black_king_1" and abs(target.x - initial.x) == 2:
             if target.x - initial.x == 2:
-                self.board_instance.canvas.move(self.board_instance.black_rook_2, -2 * bv.TILE_LENGTH, 0)
+                self.board_instance.canvas.move(self.board_instance.black_rook_2, -2 * bp.TILE_LENGTH, 0)
                 figures_squares_now["black_rook_2"] = square_names_objs["f8"]
             elif target.x - initial.x == -2:
-                self.board_instance.canvas.move(self.board_instance.black_rook_1, 3 * bv.TILE_LENGTH, 0)
+                self.board_instance.canvas.move(self.board_instance.black_rook_1, 3 * bp.TILE_LENGTH, 0)
                 figures_squares_now["black_rook_1"] = square_names_objs["d8"]
 
