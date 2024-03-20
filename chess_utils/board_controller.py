@@ -4,7 +4,7 @@
 
 # TODO: pass movement system to view (remove promotion types import), 
 
-import chess_utils.board_params as bp
+import chess_utils.board_parameters as bp
 from chess_utils.board_model import square_names_objs, figures_squares_now, Figure, Square, Color, Queen, Rook, Knight, Bishop
 import tkinter as tk
 

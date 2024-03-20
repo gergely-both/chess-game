@@ -3,7 +3,7 @@
 #########################################
 
 
-import chess_utils.board_params as bp
+import chess_utils.board_parameters as bp
 from collections import namedtuple
 from enum import Enum
 from itertools import cycle, chain
