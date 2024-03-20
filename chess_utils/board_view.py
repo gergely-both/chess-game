@@ -16,14 +16,13 @@ class Board:
         self.master.title("Chess Game")
         self.master.geometry(f"{TILES_PER_SIDE * TILE_LENGTH}x{TILES_PER_SIDE * TILE_LENGTH}")
         self.master.resizable(False, False)
+        
         self.canvas = tk.Canvas(master=master, width=TILES_PER_SIDE * TILE_LENGTH, height=TILES_PER_SIDE * TILE_LENGTH, highlightthickness=0)
-
         for i in range(0, TILES_PER_SIDE*TILE_LENGTH, 2*TILE_LENGTH):
             for j in range(0, TILES_PER_SIDE*TILE_LENGTH, 2*TILE_LENGTH):
                 for k in range(0, TILES_PER_SIDE*TILE_LENGTH, TILE_LENGTH):
                     self.canvas.create_rectangle(i+k, j+k, TILE_LENGTH+i+k, TILE_LENGTH+j+k, fill=LIGHT_COLOR)
                     self.canvas.create_rectangle((TILES_PER_SIDE*TILE_LENGTH)-i-k, j+k, ((TILES_PER_SIDE-1)*TILE_LENGTH)-i-k, TILE_LENGTH+j+k, fill=DARK_COLOR)
-        
         self.canvas.pack()
 
         self.img_files = os.listdir(RESOURCE_PATH)
@@ -35,16 +34,18 @@ class Board:
 
         self.game_instance = None
 
-    def click(self, event, game):
-        """makes contact between types for mutual reference; sends GUI event to controller"""
-        self.game_instance = game
-        Figure.game_instance = game
-        Square.game_instance = game
-        game.board_instance = self
+        
+    def click(self, event, game_instance):
+        """makes contact between types for mutual references; sends GUI event to controller"""
+        self.game_instance = game_instance
+        Figure.game_instance = game_instance
+        Square.game_instance = game_instance
+        game_instance.board_instance = self
 
         selected_coordinates = event.x, event.y
-        game.select_square(selected_coordinates)
+        game_instance.select_square(selected_coordinates)
 
+        
     def show_possibilities(self):
         """makes possibility-showing canvas objects and their IDs"""
         game = self.game_instance
@@ -63,6 +64,7 @@ class Board:
             game.chosen_figure = None
             game.initial_square = None
 
+            
     def hide_possibilities(self):
         """removes possibility-showing canvas objects by their IDs"""
         for square in square_names_objs:
