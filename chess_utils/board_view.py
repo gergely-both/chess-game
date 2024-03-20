@@ -2,7 +2,7 @@
 # VIEW
 #########################################
 
-# TODO: king in safety move to upper class, click system revise, make pngs resizable by param, 
+# TODO: click system revise, make pngs resizable by param, 
 
 from chess_utils.board_params import RESOURCE_PATH, TILES_PER_SIDE, TILE_LENGTH, DARK_COLOR, LIGHT_COLOR
 from chess_utils.board_model import square_names_objs, figures_squares_now, figures_squares_orig, Figure, Square
