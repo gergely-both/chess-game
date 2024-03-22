@@ -33,15 +33,20 @@ class Board:
         for figure, square in figures_squares_orig.items():  
             setattr(self, str(figure), self.canvas.create_image(square.central_coordinates, image=getattr(self, figure.name)))
 
+        board_instance = None
         game_instance = None
 
         
     def click(self, event, game_instance):
         # TODO: make click bound to specific instances instead whole classes, if viable (to make multi-window display possible)
         """binds board and game instances to other types for mutual reference; dispatches to controller section"""
+        Board.board_instance = self
         Board.game_instance = game_instance
         Game.board_instance = self
+        Game.game_instance = game_instance
+        Figure.board_instance = self
         Figure.game_instance = game_instance
+        Square.board_instance = self
         Square.game_instance = game_instance
 
         selected_coordinates = event.x, event.y
@@ -55,8 +60,8 @@ class Board:
         for square, obj in square_names_objs.items():
             target_square = obj
 
-            if self.game_instance.chosen_figure.validate_move(self.game_instance.initial_square, target_square, figures_squares_now):
-                if Figure.king_in_safety(self.game_instance.chosen_figure, target_square):
+            if self.game_instance.chosen_figure.validate_move(target_square, figures_squares_now):
+                if Figure.king_in_safety(target_square):
                     if Square.square_not_owned(target_square):
                         origo = target_square.central_coordinates
                         radius = TILE_LENGTH // 8

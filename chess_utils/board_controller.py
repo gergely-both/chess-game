@@ -21,6 +21,7 @@ class Game:
         self.log = []
 
         board_instance = None
+        game_instance = None
 
         
     def detect_turn(self):
@@ -49,8 +50,8 @@ class Game:
             self.board_instance.hide_possibilities()
             target_square = selected_square
             if not self.choose_piece(selected_square):
-                if self.chosen_figure.validate_move(self.initial_square, target_square, figures_squares_now):
-                    if Figure.king_in_safety(self.chosen_figure, target_square):
+                if self.chosen_figure.validate_move(target_square, figures_squares_now):
+                    if Figure.king_in_safety(target_square):
                         self.make_move(target_square)
                         self.log.append([self.turn, str(self.chosen_figure), str(self.initial_square), str(target_square)])
                         self.turn += 1
