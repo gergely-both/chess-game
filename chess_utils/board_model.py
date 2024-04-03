@@ -21,15 +21,15 @@ class Square:
         self.name = name
         self.all_coordinates = all_coordinates
         self.central_coordinates = central_coordinates
-        self.numerically = NumberedEquivalent(bp.numeric_equivalent[name[0]], int(name[1]))
+        self.numerically = NumberedEquivalent(
+            bp.numeric_equivalent[name[0]], int(name[1])
+        )
 
         board_instance = None
         game_instance = None
-        
 
     def __repr__(self):
         return self.name
-
 
     @classmethod
     def alphabetically(cls, num_pair):
@@ -39,7 +39,6 @@ class Square:
                 if obj.numerically == num_pair:
                     return obj
 
-
     @classmethod
     def detect_square(cls, coordinates):
         """returns square object of clicked coordinates"""
@@ -47,12 +46,14 @@ class Square:
             if coordinates in obj.all_coordinates:
                 return obj
 
-
     @classmethod
     def square_not_owned(cls, square):
         """checks/scans if square is already occupied by own piece"""
         for dict_figure, dict_square in figures_squares_now.items():
-            if square is dict_square and dict_figure.color is cls.game_instance.chosen_figure.color:
+            if (
+                square is dict_square
+                and dict_figure.color is cls.game_instance.chosen_figure.color
+            ):
                 return False
         return True
 
@@ -72,19 +73,15 @@ class Figure:
         board_instance = None
         game_instance = None
 
-
     def __repr__(self):
         color = str(self.color).split(".")[1].lower()
         return f"{color}_{self.kind}_{self.number}"
 
-
     def __hash__(self):
         return hash(self.__repr__())
 
-
     def __eq__(self, other):
         return hash(self) == hash(other)
-
 
     def passage_free(self, initial, target, positions_dict):
         """checks/scans if any square between initial and target squares is occupied by any piece"""
@@ -96,12 +93,15 @@ class Figure:
                 if Square.alphabetically(num_pair) in positions_dict.values():
                     return False
         elif x or y:
-            xy = list(zip(cycle([target.x]), y) if len(x) < len(y) else zip(x, cycle([target.y])))
+            xy = list(
+                zip(cycle([target.x]), y)
+                if len(x) < len(y)
+                else zip(x, cycle([target.y]))
+            )
             for num_pair in xy:
                 if Square.alphabetically(num_pair) in positions_dict.values():
                     return False
         return True
-
 
     @classmethod
     def detect_figure(cls, selected_square):
@@ -110,13 +110,13 @@ class Figure:
             if selected_square is square:
                 return figure
 
-
     def detect_enemy(self, selected_square):
         detected_piece = Figure.detect_figure(selected_square)
         if detected_piece:
-            enemy_piece = detected_piece if (detected_piece.color != self.color) else None
+            enemy_piece = (
+                detected_piece if (detected_piece.color != self.color) else None
+            )
             return enemy_piece
-
 
     @classmethod
     def king_in_safety(cls, target_square):
@@ -132,12 +132,16 @@ class Figure:
         if chosen_figure.color == Color.WHITE:
             for figure in projected_positions:
                 if figure.color == Color.BLACK:
-                    if figure.validate_move(projected_positions["white_king_1"], projected_positions):
+                    if figure.validate_move(
+                        projected_positions["white_king_1"], projected_positions
+                    ):
                         return False
         elif chosen_figure.color == Color.BLACK:
             for figure in projected_positions:
                 if figure.color == Color.WHITE:
-                    if figure.validate_move(projected_positions["black_king_1"], projected_positions):
+                    if figure.validate_move(
+                        projected_positions["black_king_1"], projected_positions
+                    ):
                         return False
         return True
 
@@ -146,18 +150,25 @@ class Pawn(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates pawn moves: by both colors, initial double move OR simple move, capturing simply OR en passant"""
         initial = positions_dict[self].numerically
         target = target_square.numerically
         if self.color == Color.WHITE:
-            if initial.y == 2 and target.y == 4 and initial.x == target.x \
-                    and target_square not in positions_dict.values() \
-                    and self.passage_free(initial, target, positions_dict):
+            if (
+                initial.y == 2
+                and target.y == 4
+                and initial.x == target.x
+                and target_square not in positions_dict.values()
+                and self.passage_free(initial, target, positions_dict)
+            ):
                 return True
-            elif initial.y >= 2 and target.y - initial.y == 1 and initial.x == target.x \
-                    and target_square not in positions_dict.values():
+            elif (
+                initial.y >= 2
+                and target.y - initial.y == 1
+                and initial.x == target.x
+                and target_square not in positions_dict.values()
+            ):
                 return True
             elif target.y - initial.y == 1 and abs(target.x - initial.x) == 1:
                 if self.detect_enemy(target_square):
@@ -166,15 +177,27 @@ class Pawn(Figure):
                     enpass_location = Square.alphabetically((target.x, target.y - 1))
                     enpass_enemy = self.detect_enemy(enpass_location)
                     if enpass_enemy and isinstance(enpass_enemy, Pawn):
-                        if {enpass_enemy, str(figures_squares_orig[enpass_enemy])}.issubset(self.game_instance.log[-1]):
+                        if {
+                            enpass_enemy,
+                            str(figures_squares_orig[enpass_enemy]),
+                        }.issubset(self.game_instance.log[-1]):
                             self.game_instance.enpass_enemy = enpass_enemy
                             return True
         elif self.color == Color.BLACK:
-            if initial.y == 7 and target.y == 5 and initial.x == target.x \
-                    and target_square not in positions_dict.values() and self.passage_free(initial, target, positions_dict):
+            if (
+                initial.y == 7
+                and target.y == 5
+                and initial.x == target.x
+                and target_square not in positions_dict.values()
+                and self.passage_free(initial, target, positions_dict)
+            ):
                 return True
-            elif initial.y <= 7 and initial.y - target.y == 1 and initial.x == target.x \
-                    and target_square not in positions_dict.values():
+            elif (
+                initial.y <= 7
+                and initial.y - target.y == 1
+                and initial.x == target.x
+                and target_square not in positions_dict.values()
+            ):
                 return True
             elif initial.y - target.y == 1 and abs(target.x - initial.x) == 1:
                 if self.detect_enemy(target_square):
@@ -183,7 +206,10 @@ class Pawn(Figure):
                     enpass_location = Square.alphabetically((target.x, target.y + 1))
                     enpass_enemy = self.detect_figure(enpass_location)
                     if enpass_enemy and isinstance(enpass_enemy, Pawn):
-                        if {enpass_enemy, str(figures_squares_orig[enpass_enemy])}.issubset(self.game_instance.log[-1]):
+                        if {
+                            enpass_enemy,
+                            str(figures_squares_orig[enpass_enemy]),
+                        }.issubset(self.game_instance.log[-1]):
                             self.game_instance.enpass_enemy = enpass_enemy
                             return True
 
@@ -192,7 +218,6 @@ class King(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates king moves: single move OR castling (short or long: user-selected non-offensive)"""
         # NOTE: cannot castle from/through/into check, into case checked elsewhere, also passage must be free
@@ -200,27 +225,57 @@ class King(Figure):
         target = target_square.numerically
         if abs(target.x - initial.x) <= 1 and abs(target.y - initial.y) <= 1:
             return True
-        elif self == self.game_instance.chosen_figure and abs(target.x - initial.x) == 2 and target.y - initial.y == 0:
+        elif (
+            self == self.game_instance.chosen_figure
+            and abs(target.x - initial.x) == 2
+            and target.y - initial.y == 0
+        ):
             if self.game_instance.chosen_figure not in chain(*self.game_instance.log):
-                if Figure.king_in_safety(target_square=self.game_instance.initial_square):
+                if Figure.king_in_safety(
+                    target_square=self.game_instance.initial_square
+                ):
                     if target.x > initial.x:
-                        castle_midpoint_square = Square.alphabetically((target.x - 1, target.y))
+                        castle_midpoint_square = Square.alphabetically(
+                            (target.x - 1, target.y)
+                        )
                         if self.game_instance.chosen_figure.color == Color.WHITE:
-                            if "white_rook_2" not in chain(*self.game_instance.log) and "white_rook_2" in positions_dict:
-                                rook_position_num = figures_squares_now["white_rook_2"].numerically
+                            if (
+                                "white_rook_2" not in chain(*self.game_instance.log)
+                                and "white_rook_2" in positions_dict
+                            ):
+                                rook_position_num = figures_squares_now[
+                                    "white_rook_2"
+                                ].numerically
                         elif self.game_instance.chosen_figure.color == Color.BLACK:
-                            if "black_rook_2" not in chain(*self.game_instance.log) and "black_rook_2" in positions_dict:
-                                rook_position_num = figures_squares_now["black_rook_2"].numerically
+                            if (
+                                "black_rook_2" not in chain(*self.game_instance.log)
+                                and "black_rook_2" in positions_dict
+                            ):
+                                rook_position_num = figures_squares_now[
+                                    "black_rook_2"
+                                ].numerically
                         else:
                             return False
                     elif target.x < initial.x:
-                        castle_midpoint_square = Square.alphabetically((target.x + 1, target.y))
+                        castle_midpoint_square = Square.alphabetically(
+                            (target.x + 1, target.y)
+                        )
                         if self.game_instance.chosen_figure.color == Color.WHITE:
-                            if "white_rook_1" not in chain(*self.game_instance.log) and "white_rook_1" in positions_dict:
-                                rook_position_num = figures_squares_now["white_rook_1"].numerically
+                            if (
+                                "white_rook_1" not in chain(*self.game_instance.log)
+                                and "white_rook_1" in positions_dict
+                            ):
+                                rook_position_num = figures_squares_now[
+                                    "white_rook_1"
+                                ].numerically
                         elif self.game_instance.chosen_figure.color == Color.BLACK:
-                            if "black_rook_1" not in chain(*self.game_instance.log) and "black_rook_1" in positions_dict:
-                                rook_position_num = figures_squares_now["black_rook_1"].numerically
+                            if (
+                                "black_rook_1" not in chain(*self.game_instance.log)
+                                and "black_rook_1" in positions_dict
+                            ):
+                                rook_position_num = figures_squares_now[
+                                    "black_rook_1"
+                                ].numerically
                         else:
                             return False
 
@@ -233,49 +288,57 @@ class Rook(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates rook moves"""
         initial = positions_dict[self].numerically
-        target = target_square.numerically        
-        return (target.x - initial.x == 0 or target.y - initial.y == 0) and self.passage_free(initial, target, positions_dict)
+        target = target_square.numerically
+        return (
+            target.x - initial.x == 0 or target.y - initial.y == 0
+        ) and self.passage_free(initial, target, positions_dict)
 
 
 class Bishop(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates bishop moves"""
         initial = positions_dict[self].numerically
-        target = target_square.numerically        
-        return abs(target.x - initial.x) == abs(target.y - initial.y) and self.passage_free(initial, target, positions_dict)
+        target = target_square.numerically
+        return abs(target.x - initial.x) == abs(
+            target.y - initial.y
+        ) and self.passage_free(initial, target, positions_dict)
 
 
 class Queen(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates queen moves"""
         initial = positions_dict[self].numerically
-        target = target_square.numerically        
-        return ((target.x - initial.x == 0 or target.y - initial.y == 0) and self.passage_free(initial, target, positions_dict)) \
-            or (abs(target.x - initial.x) == abs(target.y - initial.y) and self.passage_free(initial, target, positions_dict))
+        target = target_square.numerically
+        return (
+            (target.x - initial.x == 0 or target.y - initial.y == 0)
+            and self.passage_free(initial, target, positions_dict)
+        ) or (
+            abs(target.x - initial.x) == abs(target.y - initial.y)
+            and self.passage_free(initial, target, positions_dict)
+        )
 
 
 class Knight(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-
     def validate_move(self, target_square, positions_dict):
         """validates knight moves"""
         initial = positions_dict[self].numerically
-        target = target_square.numerically        
-        return abs(target.x - initial.x) in {1, 2} and abs(target.x - initial.x) + abs(target.y - initial.y) == 3
+        target = target_square.numerically
+        return (
+            abs(target.x - initial.x) in {1, 2}
+            and abs(target.x - initial.x) + abs(target.y - initial.y) == 3
+        )
 
 
 # GENERATING OBJECTS FROM STRINGS INTO MULTIPLE REFERENCE DICTS; SAVING COPY FOR STARTING LAYOUT
@@ -305,4 +368,3 @@ for piece, position in bp.pieces_and_positions.items():
     square = square_names_objs[position]
     figures_squares_orig[figure] = square
 figures_squares_now = figures_squares_orig.copy()
-

@@ -4,7 +4,7 @@ RESOURCE_PATH = "chess_pieces/"
 
 # chess board design
 TILES_PER_SIDE = 8
-TILE_LENGTH = 100 # pixels
+TILE_LENGTH = 100  # pixels
 DARK_COLOR = "#1b262c"
 LIGHT_COLOR = "#0f4c75"
 
@@ -12,14 +12,24 @@ LIGHT_COLOR = "#0f4c75"
 squares_and_coordinates = {}
 for x in range(TILES_PER_SIDE):
     for y in range(TILES_PER_SIDE):
-        tile_ID = string.ascii_lowercase[:TILES_PER_SIDE][x] + string.digits[TILES_PER_SIDE:0:-1][y]
-        tile_coordinates = [(xb, yb) for xb in range(x * TILE_LENGTH, (x + 1) * TILE_LENGTH) for yb in range(y * TILE_LENGTH, (y + 1) * TILE_LENGTH)]
+        tile_ID = (
+            string.ascii_lowercase[:TILES_PER_SIDE][x]
+            + string.digits[TILES_PER_SIDE:0:-1][y]
+        )
+        tile_coordinates = [
+            (xb, yb)
+            for xb in range(x * TILE_LENGTH, (x + 1) * TILE_LENGTH)
+            for yb in range(y * TILE_LENGTH, (y + 1) * TILE_LENGTH)
+        ]
         squares_and_coordinates[tile_ID] = tile_coordinates
 
 # square names with their central coordinates
 square_centers = {}
 for square in squares_and_coordinates:
-    coordinates = (squares_and_coordinates[square][0][0] + TILE_LENGTH // 2, squares_and_coordinates[square][0][1] + TILE_LENGTH // 2)
+    coordinates = (
+        squares_and_coordinates[square][0][0] + TILE_LENGTH // 2,
+        squares_and_coordinates[square][0][1] + TILE_LENGTH // 2,
+    )
     square_centers[square] = coordinates
 
 # piece names with their starting positions
@@ -62,5 +72,11 @@ pieces_and_positions = {
 starting_positions = pieces_and_positions.copy()
 
 # chess board squares name forms
-numeric_equivalent = {letter: number for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
-lettered_equivalent = {number: letter for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)}
+numeric_equivalent = {
+    letter: number
+    for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)
+}
+lettered_equivalent = {
+    number: letter
+    for number, letter in enumerate(string.ascii_lowercase[:TILES_PER_SIDE], start=1)
+}
