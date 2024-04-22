@@ -1,25 +1,68 @@
-#########################################
-# VIEW
-#########################################
-
-
-from chess_utils.board_parameters import (
-    RESOURCE_PATH,
-    TILES_PER_SIDE,
+from . import Color
+from . import Figure, King, Queen, Pawn, Rook, Knight, Bishop
+from .game_model import Game
+from .board_parameters import (
     TILE_LENGTH,
-    DARK_COLOR,
+    TILES_PER_SIDE,
     LIGHT_COLOR,
+    DARK_COLOR,
+    RESOURCE_PATH,
+    pieces_and_positions,
+    squares_and_coordinates,
+    square_centers,
+    numeric_equivalent,
 )
-from chess_utils.board_model import (
-    square_names_objs,
-    figures_squares_now,
-    figures_squares_orig,
-    Figure,
-    Square,
-)
-from chess_utils.board_controller import Game
+
 import tkinter as tk
 import os
+from collections import namedtuple
+
+
+NumberedEquivalent = namedtuple("NumberedEquivalent", ["x", "y"])
+square_names_objs = {}
+figure_names_objs = {}
+figures_squares_orig = {}
+figures_squares_now = {}
+
+
+class Square:
+    def __init__(self, name, all_coordinates, central_coordinates):
+        self.name = name
+        self.all_coordinates = all_coordinates
+        self.central_coordinates = central_coordinates
+        self.numerically = NumberedEquivalent(numeric_equivalent[name[0]], int(name[1]))
+
+        board_instance = None
+        game_instance = None
+
+    def __repr__(self):
+        return self.name
+
+    @classmethod
+    def alphabetically(cls, num_pair):
+        """returns square name from numeric equivalent"""
+        if len(num_pair) == 2:
+            for obj in square_names_objs.values():
+                if obj.numerically == num_pair:
+                    return obj
+
+    @classmethod
+    def detect_square(cls, coordinates):
+        """returns square object of clicked coordinates"""
+        for obj in square_names_objs.values():
+            if coordinates in obj.all_coordinates:
+                return obj
+
+    @classmethod
+    def square_not_owned(cls, square):
+        """checks/scans if square is already occupied by own piece"""
+        for dict_figure, dict_square in figures_squares_now.items():
+            if (
+                square is dict_square
+                and dict_figure.color is cls.game_instance.chosen_figure.color
+            ):
+                return False
+        return True
 
 
 class Board:
@@ -131,3 +174,32 @@ class Board:
                 self.canvas.delete(getattr(self, str(square)))
             except AttributeError:
                 continue
+
+
+# GENERATING OBJECTS FROM STRINGS INTO MULTIPLE REFERENCE DICTS; SAVING COPY FOR STARTING LAYOUT
+for square, coordinates in squares_and_coordinates.items():
+    central_coordinates = square_centers[square]
+    square_names_objs[square] = Square(square, coordinates, central_coordinates)
+
+for piece in pieces_and_positions:
+    attributes = piece.split("_")
+    color, kind, number = attributes[0], attributes[1], int(attributes[2])
+    name = color + "_" + kind
+    if kind == "pawn":
+        figure_names_objs[piece] = Pawn(Color[color.upper()], kind, name, number)
+    elif kind == "king":
+        figure_names_objs[piece] = King(Color[color.upper()], kind, name, number)
+    elif kind == "rook":
+        figure_names_objs[piece] = Rook(Color[color.upper()], kind, name, number)
+    elif kind == "bishop":
+        figure_names_objs[piece] = Bishop(Color[color.upper()], kind, name, number)
+    elif kind == "queen":
+        figure_names_objs[piece] = Queen(Color[color.upper()], kind, name, number)
+    elif kind == "knight":
+        figure_names_objs[piece] = Knight(Color[color.upper()], kind, name, number)
+
+for piece, position in pieces_and_positions.items():
+    figure = figure_names_objs[piece]
+    square = square_names_objs[position]
+    figures_squares_orig[figure] = square
+figures_squares_now = figures_squares_orig.copy()

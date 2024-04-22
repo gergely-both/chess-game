@@ -1,20 +1,8 @@
-#########################################
-# CONTROLLER
-#########################################
+from .board_parameters import TILE_LENGTH
+from .board_model import Square, figures_squares_now, square_names_objs
+from .color_model import Color
+from .figure_model import Figure, Rook, Bishop, Queen, Knight
 
-
-import chess_utils.board_parameters as bp
-from chess_utils.board_model import (
-    square_names_objs,
-    figures_squares_now,
-    Figure,
-    Square,
-    Color,
-    Queen,
-    Rook,
-    Knight,
-    Bishop,
-)
 import tkinter as tk
 
 
@@ -141,8 +129,8 @@ class Game:
         # TODO: pass movement system to view (remove promotion types import),
         """removes captured figure from positions db, makes move, sends to promotion, does castling"""
         initial, target = self.initial_square.numerically, target_square.numerically
-        x = (target.x - initial.x) * bp.TILE_LENGTH
-        y = (initial.y - target.y) * bp.TILE_LENGTH
+        x = (target.x - initial.x) * TILE_LENGTH
+        y = (initial.y - target.y) * TILE_LENGTH
         if self.attacked_figure:
             del figures_squares_now[self.attacked_figure]
             self.board_instance.canvas.delete(
@@ -190,12 +178,12 @@ class Game:
         ):
             if target.x - initial.x == 2:
                 self.board_instance.canvas.move(
-                    self.board_instance.white_rook_2, -2 * bp.TILE_LENGTH, 0
+                    self.board_instance.white_rook_2, -2 * TILE_LENGTH, 0
                 )
                 figures_squares_now["white_rook_2"] = square_names_objs["f1"]
             elif target.x - initial.x == -2:
                 self.board_instance.canvas.move(
-                    self.board_instance.white_rook_1, 3 * bp.TILE_LENGTH, 0
+                    self.board_instance.white_rook_1, 3 * TILE_LENGTH, 0
                 )
                 figures_squares_now["white_rook_1"] = square_names_objs["d1"]
         elif (
@@ -203,11 +191,11 @@ class Game:
         ):
             if target.x - initial.x == 2:
                 self.board_instance.canvas.move(
-                    self.board_instance.black_rook_2, -2 * bp.TILE_LENGTH, 0
+                    self.board_instance.black_rook_2, -2 * TILE_LENGTH, 0
                 )
                 figures_squares_now["black_rook_2"] = square_names_objs["f8"]
             elif target.x - initial.x == -2:
                 self.board_instance.canvas.move(
-                    self.board_instance.black_rook_1, 3 * bp.TILE_LENGTH, 0
+                    self.board_instance.black_rook_1, 3 * TILE_LENGTH, 0
                 )
                 figures_squares_now["black_rook_1"] = square_names_objs["d8"]

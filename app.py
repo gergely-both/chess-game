@@ -1,4 +1,4 @@
-from chess_utils import Board, Game
+from models import Board, Game
 import tkinter as tk
 
 

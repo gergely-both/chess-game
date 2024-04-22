@@ -1,6 +1,7 @@
 import string
+import os
 
-RESOURCE_PATH = "chess_pieces/"
+RESOURCE_PATH = os.path.join(os.path.dirname(__file__), "resources/")
 
 # chess board design
 TILES_PER_SIDE = 8

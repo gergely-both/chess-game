@@ -5,4 +5,4 @@ GUI chess game currently for 2 players, to be expanded to include chess engine i
 - impossible move selection deselects chess piece
 - long and short castling, en passant, pawn promotions, absolute pin etc. all working as per the rules
 ### Running
-Run `python3 -m chess_game`. Requires Tkinter to work.
+Run `python3 -m app`. Requires Tkinter to work.
