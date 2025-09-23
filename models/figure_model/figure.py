@@ -1,5 +1,5 @@
-from ..color_model import Color
-from ..board_model_view import Square, figures_squares_now
+from . import Color
+from . import Square, figures_squares_now
 
 from itertools import cycle
 
@@ -10,9 +10,6 @@ class Figure:
         self.kind: str = kind
         self.name: str = name
         self.number: int = number
-
-        board_instance = None
-        game_instance = None
 
     def __repr__(self):
         color = str(self.color).split(".")[1].lower()
@@ -60,9 +57,9 @@ class Figure:
             return enemy_piece
 
     @classmethod
-    def king_in_safety(cls, target_square):
+    def king_in_safety(cls, target_square, game_instance):
         """checks if piece move to target square threatens own king; special case: castling"""
-        chosen_figure = cls.game_instance.chosen_figure
+        chosen_figure = game_instance.chosen_figure
         projected_positions = figures_squares_now.copy()
 
         attacked_piece = chosen_figure.detect_enemy(target_square)

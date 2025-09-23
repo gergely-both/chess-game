@@ -1,10 +1,11 @@
-from .figure import Figure
+from . import Figure
+
 
 class Rook(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-    def validate_move(self, target_square, positions_dict):
+    def validate_move(self, target_square, positions_dict, game_instance):
         """validates rook moves"""
         initial = positions_dict[self].numerically
         target = target_square.numerically

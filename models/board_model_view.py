@@ -1,7 +1,6 @@
 from . import Color
 from . import Figure, King, Queen, Pawn, Rook, Knight, Bishop
-from .game_model_controller import Game
-from .board_parameters import (
+from . import (
     TILE_LENGTH,
     TILES_PER_SIDE,
     LIGHT_COLOR,
@@ -35,9 +34,6 @@ class Square:
         self.central_coordinates = central_coordinates
         self.numerically = NumberedEquivalent(numeric_equivalent[name[0]], int(name[1]))
         Square.all_existing_squares.add(self)
-
-        board_instance = None
-        game_instance = None
 
     def __repr__(self):
         return self.name
@@ -119,9 +115,6 @@ class Board:
                 ),
             )
 
-        # board_instance = None
-        # game_instance = None
-
     def click(self, event, game_instance):
         """sends user action values for analysis and feedback"""
         selected_coordinates = event.x, event.y
@@ -136,7 +129,7 @@ class Board:
             if game_instance.chosen_figure.validate_move(
                 target_square, figures_squares_now
             ):
-                if Figure.king_in_safety(target_square):
+                if Figure.king_in_safety(target_square, game_instance):
                     if Square.square_not_owned(target_square, game_instance):
                         origo = target_square.central_coordinates
                         radius = TILE_LENGTH // 8

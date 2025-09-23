@@ -1,7 +1,7 @@
-from .board_parameters import TILE_LENGTH
-from .board_model_view import Square, figures_squares_now, square_names_objs
-from .color_model import Color
-from .figure_model import Figure, Rook, Bishop, Queen, Knight
+from . import TILE_LENGTH
+from . import Square, figures_squares_now, square_names_objs
+from . import Color
+from . import Figure, Rook, Bishop, Queen, Knight
 
 import tkinter as tk
 
@@ -18,9 +18,6 @@ class Game:
         self.promote_piece = None
         self.promote_at = None
         self.log = []
-
-        board_instance = None
-        game_instance = None
 
     def detect_turn(self):
         """returns current turn's color"""
@@ -49,9 +46,9 @@ class Game:
                 selected_square
             ):  # target is to move to, not own piece reselection
                 if self.chosen_figure.validate_move(
-                    target_square, figures_squares_now
+                    target_square, figures_squares_now, self
                 ):  # if target is legit
-                    if Figure.king_in_safety(target_square):
+                    if Figure.king_in_safety(target_square, self):
                         self.make_move(target_square, board_instance)
                         self.write_to_log(target_square)
                         self.turn += 1 # turn ended

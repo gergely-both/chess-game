@@ -1,13 +1,13 @@
-from .figure import Figure
-from ..board_model_view import Square, figures_squares_orig
-from ..color_model import Color
+from . import Figure
+from . import Square, figures_squares_orig
+from . import Color
 
 
 class Pawn(Figure):
     def __init__(self, color, kind, name, number):
         super().__init__(color, kind, name, number)
 
-    def validate_move(self, target_square, positions_dict):
+    def validate_move(self, target_square, positions_dict, game_instance):
         """validates pawn moves: by both colors, initial double move OR simple move, capturing simply OR en passant"""
         initial = positions_dict[self].numerically
         target = target_square.numerically
@@ -37,8 +37,8 @@ class Pawn(Figure):
                         if {
                             enpass_enemy,
                             str(figures_squares_orig[enpass_enemy]),
-                        }.issubset(self.game_instance.log[-1]):
-                            self.game_instance.enpass_enemy = enpass_enemy
+                        }.issubset(game_instance.log[-1]):
+                            game_instance.enpass_enemy = enpass_enemy
                             return True
         elif self.color == Color.BLACK:
             if (
@@ -66,7 +66,6 @@ class Pawn(Figure):
                         if {
                             enpass_enemy,
                             str(figures_squares_orig[enpass_enemy]),
-                        }.issubset(self.game_instance.log[-1]):
-                            self.game_instance.enpass_enemy = enpass_enemy
+                        }.issubset(game_instance.log[-1]):
+                            game_instance.enpass_enemy = enpass_enemy
                             return True
-
