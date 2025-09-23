@@ -1,6 +1,6 @@
 from ..color_model import Color
 from .figure import Figure
-from ..board_model import Square, figures_squares_now
+from ..board_model_view import Square, figures_squares_now
 
 
 from itertools import chain
@@ -12,7 +12,6 @@ class King(Figure):
 
     def validate_move(self, target_square, positions_dict):
         """validates king moves: single move OR castling (short or long: user-selected non-offensive)"""
-        # NOTE: cannot castle from/through/into check, into case checked elsewhere, also passage must be free
         initial = positions_dict[self].numerically
         target = target_square.numerically
         if abs(target.x - initial.x) <= 1 and abs(target.y - initial.y) <= 1:

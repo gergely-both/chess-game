@@ -1,5 +1,5 @@
 from .figure import Figure
-from ..board_model import Square, figures_squares_orig
+from ..board_model_view import Square, figures_squares_orig
 from ..color_model import Color
 
 

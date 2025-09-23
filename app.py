@@ -3,6 +3,7 @@ import tkinter as tk
 
 
 def user_interaction(board_instance, game_instance):
+    """Passing user action to relevant board and game instances."""
     board_instance.canvas.bind(
         "<Button-1>", lambda event: board_instance.click(event, game_instance)
     )

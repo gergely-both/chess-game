@@ -1,6 +1,6 @@
 from . import Color
 from . import Figure, King, Queen, Pawn, Rook, Knight, Bishop
-from .game_model import Game
+from .game_model_controller import Game
 from .board_parameters import (
     TILE_LENGTH,
     TILES_PER_SIDE,
@@ -26,11 +26,15 @@ figures_squares_now = {}
 
 
 class Square:
+
+    all_existing_squares = set()
+
     def __init__(self, name, all_coordinates, central_coordinates):
         self.name = name
         self.all_coordinates = all_coordinates
         self.central_coordinates = central_coordinates
         self.numerically = NumberedEquivalent(numeric_equivalent[name[0]], int(name[1]))
+        Square.all_existing_squares.add(self)
 
         board_instance = None
         game_instance = None
@@ -54,12 +58,12 @@ class Square:
                 return obj
 
     @classmethod
-    def square_not_owned(cls, square):
+    def square_not_owned(cls, square, game_instance):
         """checks/scans if square is already occupied by own piece"""
         for dict_figure, dict_square in figures_squares_now.items():
             if (
                 square is dict_square
-                and dict_figure.color is cls.game_instance.chosen_figure.color
+                and dict_figure.color is game_instance.chosen_figure.color
             ):
                 return False
         return True
@@ -100,7 +104,6 @@ class Board:
                         fill=DARK_COLOR,
                     )
         self.canvas.pack()
-        # TODO: make pngs resizable by parameters,
         self.img_files = os.listdir(RESOURCE_PATH)
         self.imgname_relpath = {
             os.path.splitext(k)[0]: RESOURCE_PATH + k for k in self.img_files
@@ -116,42 +119,31 @@ class Board:
                 ),
             )
 
-        board_instance = None
-        game_instance = None
+        # board_instance = None
+        # game_instance = None
 
     def click(self, event, game_instance):
-        # TODO: make click bound to specific instances instead whole classes, if viable (to make multi-window display possible)
-        """binds board and game instances to other types for mutual reference; dispatches to controller section"""
-        Board.board_instance = self
-        Board.game_instance = game_instance
-        Game.board_instance = self
-        Game.game_instance = game_instance
-        Figure.board_instance = self
-        Figure.game_instance = game_instance
-        Square.board_instance = self
-        Square.game_instance = game_instance
-
+        """sends user action values for analysis and feedback"""
         selected_coordinates = event.x, event.y
-        game_instance.select_square(selected_coordinates)
+        game_instance.select_square(selected_coordinates, self)
 
-    def show_possibilities(self):
-        # NOTE: is bound to instance and class
+    def show_possibilities(self, game_instance):
         """makes possibility-showing canvas objects and their IDs"""
         possible_squares = []
-        for square, obj in square_names_objs.items():
-            target_square = obj
+        for square in Square.all_existing_squares:
+            target_square = square
 
-            if self.game_instance.chosen_figure.validate_move(
+            if game_instance.chosen_figure.validate_move(
                 target_square, figures_squares_now
             ):
                 if Figure.king_in_safety(target_square):
-                    if Square.square_not_owned(target_square):
+                    if Square.square_not_owned(target_square, game_instance):
                         origo = target_square.central_coordinates
                         radius = TILE_LENGTH // 8
-                        fill = "green" if self.game_instance.turn % 2 != 0 else "purple"
+                        fill = "green" if game_instance.turn % 2 != 0 else "purple"
                         setattr(
                             self,
-                            square,
+                            square.name,
                             self.canvas.create_oval(
                                 origo[0] - radius,
                                 origo[1] - radius,
@@ -161,17 +153,17 @@ class Board:
                             ),
                         )
                         possible_squares.append(target_square)
-                        self.game_instance.enpass_enemy = None
+                        game_instance.enpass_enemy = None
 
         if not possible_squares:
-            self.game_instance.chosen_figure = None
-            self.game_instance.initial_square = None
+            game_instance.chosen_figure = None
+            game_instance.initial_square = None
 
     def hide_possibilities(self):
-        """removes possibility-showing canvas objects by their IDs"""
-        for square in square_names_objs:
+        """removes possibility canvas objects by ID"""
+        for square in Square.all_existing_squares:
             try:
-                self.canvas.delete(getattr(self, str(square)))
+                self.canvas.delete(getattr(self, square.name))
             except AttributeError:
                 continue
 

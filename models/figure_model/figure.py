@@ -1,5 +1,5 @@
 from ..color_model import Color
-from ..board_model import Square, figures_squares_now
+from ..board_model_view import Square, figures_squares_now
 
 from itertools import cycle
 
