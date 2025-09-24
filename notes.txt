@@ -1,3 +1,0 @@
-Chess game dev tasks:
-- modularity solve, make project separated into logical pieces
-- fix resources folder path for cx_freeze binary building to work properly

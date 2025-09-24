@@ -1,4 +1,5 @@
-from models import Board, Game
+from mvc import Board, Game
+
 import tkinter as tk
 
 

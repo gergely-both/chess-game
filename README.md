@@ -1,12 +1,12 @@
 # Chess Game
-GUI chess game for 2 players.
+GUI chess game for two players.
 
-### Features
+### Current features
+- long and short castling, en passant, pawn promotions, absolute pin etc. working according to rules
 - possible moves graphical overlay after figure selection
 - impossible move deselects chess piece
-- long and short castling, en passant, pawn promotions, absolute pin etc. working according to rules
 
-### Upcoming
+### Upcoming features
 - chess engine interactions
 
 ### Running

@@ -1,7 +1,15 @@
-from . import TILE_LENGTH
-from . import Square, figures_squares_now, square_names_objs
-from . import Color
-from . import Figure, Rook, Bishop, Queen, Knight
+from .chess_model import (
+    TILE_LENGTH,
+    Square,
+    figures_squares_now,
+    square_names_objs,
+    Color,
+    Figure,
+    Rook,
+    Bishop,
+    Queen,
+    Knight,
+)
 
 import tkinter as tk
 
@@ -51,17 +59,17 @@ class Game:
                     if Figure.king_in_safety(target_square, self):
                         self.make_move(target_square, board_instance)
                         self.write_to_log(target_square)
-                        self.turn += 1 # turn ended
+                        self.turn += 1  # turn ended
             self.reset_choices()
         elif self.choosing_piece(selected_square):
-            board_instance.show_possibilities(self) # tells board instance the game instance
+            board_instance.show_possibilities(
+                self
+            )  # tells board instance the game instance
 
     def promote_to(self, img_name, query_window, board_instance):
         """references figure to promote, its destination, and the desired new figure object"""
         del figures_squares_now[self.promote_piece]
-        board_instance.canvas.delete(
-            getattr(board_instance, str(self.promote_piece))
-        )
+        board_instance.canvas.delete(getattr(board_instance, str(self.promote_piece)))
 
         new_piece_attrs = img_name.split("_")
         new_piece_color, new_piece_kind = new_piece_attrs[0], new_piece_attrs[1]
@@ -103,7 +111,14 @@ class Game:
             )
 
         if self.promote_at:
-            setattr(board_instance, str(new_piece), board_instance.canvas.create_image(self.promote_at.central_coordinates, image=getattr(board_instance, img_name)))
+            setattr(
+                board_instance,
+                str(new_piece),
+                board_instance.canvas.create_image(
+                    self.promote_at.central_coordinates,
+                    image=getattr(board_instance, img_name),
+                ),
+            )
             figures_squares_now[new_piece] = self.promote_at
             self.promote_piece = None
             self.promote_at = None
@@ -147,35 +162,39 @@ class Game:
             )
             figures_squares_now[self.chosen_figure] = target_square
 
-            if self.chosen_figure and ((self.chosen_figure.name == "white_pawn" and target.y == 8) or (
-                self.chosen_figure.name == "black_pawn" and target.y == 1
-            )):
+            if self.chosen_figure and (
+                (self.chosen_figure.name == "white_pawn" and target.y == 8)
+                or (self.chosen_figure.name == "black_pawn" and target.y == 1)
+            ):
                 promotion_query = tk.Toplevel()
                 promotion_query.title("*PROMOTION*")
-                tk.Label(master=promotion_query, text="Select the promotion grade: ").grid(
-                    column=1, row=0, columnspan=2
-                )
+                tk.Label(
+                    master=promotion_query, text="Select the promotion grade: "
+                ).grid(column=1, row=0, columnspan=2)
                 counter = 0
                 for img_name in board_instance.imgname_relpath:
                     if "pawn" not in img_name and "king" not in img_name:
                         if (
-                            self.chosen_figure.color == Color.WHITE and "white" in img_name
+                            self.chosen_figure.color == Color.WHITE
+                            and "white" in img_name
                         ) or (
-                            self.chosen_figure.color == Color.BLACK and "black" in img_name
+                            self.chosen_figure.color == Color.BLACK
+                            and "black" in img_name
                         ):
                             tk.Button(
                                 master=promotion_query,
                                 image=getattr(board_instance, img_name),
                                 command=lambda img_name=img_name: self.promote_to(
                                     img_name, promotion_query, board_instance
-                                ), # creates buttons for figures to promote to
+                                ),  # creates buttons for figures to promote to
                             ).grid(column=counter, row=1)
                             counter += 1
                 self.promote_piece = self.chosen_figure
                 self.promote_at = target_square
 
             elif (
-                str(self.chosen_figure) == "white_king_1" and abs(target.x - initial.x) == 2
+                str(self.chosen_figure) == "white_king_1"
+                and abs(target.x - initial.x) == 2
             ):
                 if target.x - initial.x == 2:
                     board_instance.canvas.move(
@@ -188,7 +207,8 @@ class Game:
                     )
                     figures_squares_now["white_rook_1"] = square_names_objs["d1"]
             elif (
-                str(self.chosen_figure) == "black_king_1" and abs(target.x - initial.x) == 2
+                str(self.chosen_figure) == "black_king_1"
+                and abs(target.x - initial.x) == 2
             ):
                 if target.x - initial.x == 2:
                     board_instance.canvas.move(
